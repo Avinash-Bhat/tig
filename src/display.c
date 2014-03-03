@@ -441,13 +441,16 @@ get_input(int prompt_position)
 typedef enum input_status (*input_handler)(void *data, char *buf, int c);
 
 static char *
-prompt_input(const char *prompt, input_handler handler, void *data)
+prompt_input(const char *prompt, input_handler handler, void *data, bool sp_key_prompt)
 {
 	enum input_status status = INPUT_OK;
 	static char buf[SIZEOF_STR];
 	size_t pos = 0;
 
 	buf[pos] = 0;
+
+	/* set sp_key_prompt if it is enabled in options only */
+	sp_key_prompt = opt_special_key_prompt && sp_key_prompt;
 
 	while (status == INPUT_OK || status == INPUT_SKIP) {
 		int key;
@@ -460,6 +463,10 @@ prompt_input(const char *prompt, input_handler handler, void *data)
 		case KEY_RETURN:
 		case KEY_ENTER:
 		case '\n':
+			if (sp_key_prompt) {
+				status = INPUT_STOP;
+				break;
+			}
 			status = pos ? INPUT_STOP : INPUT_CANCEL;
 			break;
 
@@ -501,9 +508,9 @@ prompt_input(const char *prompt, input_handler handler, void *data)
 static enum input_status
 prompt_yesno_handler(void *data, char *buf, int c)
 {
-	if (c == 'y' || c == 'Y')
+	if (c == 'y' || c == 'Y' || c == KEY_ENTER || c == '\n' || c == KEY_RETURN)
 		return INPUT_STOP;
-	if (c == 'n' || c == 'N')
+	if (c == 'n' || c == 'N' || c == 'q')
 		return INPUT_CANCEL;
 	return INPUT_SKIP;
 }
@@ -516,7 +523,7 @@ prompt_yesno(const char *prompt)
 	if (!string_format(prompt2, "%s [Yy/Nn]", prompt))
 		return FALSE;
 
-	return !!prompt_input(prompt2, prompt_yesno_handler, NULL);
+	return !!prompt_input(prompt2, prompt_yesno_handler, NULL, TRUE);
 }
 
 static enum input_status
@@ -528,7 +535,7 @@ read_prompt_handler(void *data, char *buf, int c)
 char *
 read_prompt(const char *prompt)
 {
-	return prompt_input(prompt, read_prompt_handler, NULL);
+	return prompt_input(prompt, read_prompt_handler, NULL, FALSE);
 }
 
 bool

@@ -45,6 +45,7 @@ const char **opt_file_argv	= NULL;
 char opt_env_lines[64]		= "";
 char opt_env_columns[64]	= "";
 char *opt_env[]			= { opt_env_lines, opt_env_columns, NULL };
+bool opt_special_key_prompt	= FALSE;
 
 /*
  * Mapping between options and command argument mapping.
@@ -507,6 +508,9 @@ option_set_command(int argc, const char *argv[])
 
 	if (!strcmp(argv[0], "editor-line-number"))
 		return parse_bool(&opt_editor_line_number, argv[2]);
+
+	if (!strcmp(argv[0], "special-key-prompt"))
+		return parse_bool(&opt_special_key_prompt, argv[2]);
 
 	if (!strcmp(argv[0], "mouse"))
 		return parse_bool(&opt_mouse, argv[2]);

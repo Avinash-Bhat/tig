@@ -77,6 +77,7 @@ extern const char **opt_file_argv;
 extern char opt_env_lines[64];
 extern char opt_env_columns[64];
 extern char *opt_env[];
+extern bool opt_special_key_prompt;
 
 /*
  * Mapping between options and command argument mapping.
